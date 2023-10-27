@@ -37,7 +37,7 @@ def main():
     for _ in range(number):
         edges = get_edges()
         area = get_triangle_area(edges[0], edges[1], edges[2])
-        areas+=area
+        areas += area
 
     areas.sort()
     if len(areas) == 0:
@@ -45,7 +45,6 @@ def main():
     else:
         print(f"{areas[-1]:.2f}")
         print(f"{areas[0]:.2f}")
-
 
 
 if __name__ == '__main__':
