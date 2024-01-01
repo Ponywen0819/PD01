@@ -1,5 +1,5 @@
 def create_path(path_map):
-    start, end = input().split(" ")
+    start, end = list(map(int, input().split()))
 
     if start not in path_map.keys():
         path_map[start] = set()
@@ -12,60 +12,53 @@ def create_path(path_map):
     return path_map
 
 
-def find_path(path_map, path, end):
-    current_node = path[-1]
+def find_path(graph, current, end, visit, path=[]):
+    visit[current] = True
 
-    if current_node == end:
-        return path
+    path.append(current)
 
-    if len(path) >= len(path_map.keys()):
-        return None
+    if current == end:
+        yield path.copy()
 
-    valid_path = []
-    for node in path_map[current_node]:
-        if node not in path:
-            res = find_path(path_map, path + [node], end)
-            if res is not None:
-                valid_path.append(res)
-    valid_path.sort(key=lambda e: len(e))
-    if len(valid_path) > 0:
-        return valid_path[0]
-    return None
+    for neighbor in graph[current]:
+        if not visit[neighbor]:
+            yield from find_path(graph, neighbor, end, visit, path)
 
-
-def find_path_with_required(path_map, start, end, required_stop):
-    left_half = find_path(path_map, [start], required_stop)
-    right_half = find_path(path_map, [required_stop], end)
-
-    if left_half is not None and right_half is not None:
-        return (left_half + right_half[1:]), required_stop
-    return None
+    visit[current] = False
+    path.pop()
 
 
 def main():
-    number_of_path_string, start, end = input().split(" ")
-    number_of_path = int(number_of_path_string)
+    number_of_path, start, end = map(int, input().split())
+    required_stop_list = set(map(int, input().split()))
 
-    required_stop_list = input().split(" ")
+    path_map = {}
+    for _ in range(number_of_path):
+        path_map = create_path(path_map)
 
-    path_map = dict()
-    for i in range(number_of_path):
-        create_path(path_map)
+    paths = []
+    for i in path_map[start]:
+        visit = {node: False for node in path_map}
+        visit[i] = True
 
-    required_path_list = []
-    for required_stop in required_stop_list:
-        res = find_path_with_required(path_map, start, end, required_stop)
-        if res is not None:
-            required_path_list.append(res)
+        for path in find_path(path_map, i, end, visit):
+            paths.append(path)
 
-    if len(required_path_list) > 0:
-        required_path_list.sort(key=lambda e: len(e[0]))
-        best_path = required_path_list[0]
-        print(best_path[1])
-        print(" ".join(best_path[0]))
-    else:
+    for temp in paths:
+        temp.insert(0, start)
+
+    length = [len(temp) for temp in paths]
+    if len(paths) == 0:
         print("NO")
+    else:
+        index = length.index(min(length))
+        for village in paths[index]:
+            if village in required_stop_list:
+                print(village, end=" ")
+        print()
+        for village in paths[index]:
+            print(village, end=" ")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
